@@ -1,10 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+function debounce(callback, delay) {
+  let timer;
+  return (value) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      callback(value);
+    }, delay);
+  };
+}
+
 
 function App() {
   const [query, setQuery] = useState('');
   const [list, setList] = useState([]);
 
-  const getList = async (query) => {
+  const getList = useCallback(debounce(async (query) => {
     if (!query.trim()) {
       setList([]);
       return;
@@ -13,10 +24,22 @@ function App() {
       const response = await fetch(`http://localhost:3333/products?search=${query}`);
       const data = await response.json();
       setList(data);
+      console.log('chiamata API');
     } catch (error) {
       console.error(error);
     }
-  };
+  }, 300), []);
+
+  // Altro metodo 
+  // const debouncedGetList = useCallback(
+  //   debounce(getList, 500)
+  //   , []);
+
+  function viewDetailsProduct() {
+    console.log('dettagli');
+
+  }
+
 
   useEffect(() => {
     getList(query);
